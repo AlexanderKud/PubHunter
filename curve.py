@@ -1,9 +1,5 @@
-"""
-02/11/2022
-by Sezgin YILDIRIM
-
-"""
-
+# 02/11/2022
+# Created by Sezgin YILDIRIM
 
 from fastecdsa import keys, curve
 from fastecdsa.point import Point
@@ -39,13 +35,6 @@ class ECDSA:
 		else:
 			y = int(pub_hex[66:], 16)
 		return Point(x, y, curve=curve.secp256k1)
-
-class Utils:
-	def read(self):
-		with open('pubs.txt', 'r', encoding='utf-8') as f:
-			done = f.readlines()
-		f.close()
-		return [elem.split()[0] for elem in done]
 
 class Proc:
 	def __init__(self, public, bits):
