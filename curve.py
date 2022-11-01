@@ -67,8 +67,7 @@ class Proc:
 				if str(hex(ecdsa.ext(i, p).x))[-30:] in pubs: self.found(no[pubs.index(str(hex(ecdsa.ext(i, p).x))[-30:])] - z + i)
 
 if __name__ == "__main__":
-	public = '023ed96b524db5ff4fe007ce730366052b7c511dc566227d929070b9ce917abb43'
-	bits = 22
-	utils = Utils()
+	public = '0387dc70db1806cd9a9a76637412ec11dd998be666584849b3185f7f9313c8fd28'
+	bits = 31
 	ecdsa = ECDSA()
 	Proc(public, bits)
