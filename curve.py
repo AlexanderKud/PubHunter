@@ -48,14 +48,14 @@ class Utils:
 		return [elem.split()[0] for elem in done]
 
 class Proc:
-	def __init__(self):
-		self.public = '033c4a45cbd643ff97d77f41ea37e843648d50fd894b864b0d52febc62f6454f7c'
+	def __init__(self, public, bits):
+		self.public, self.bits = public, 2**bits
 		self.main()
 
 	def extract(self):
 		p, n = [], []
 		for i in range(1000):
-			r = randint(0x80000, 0xFFFFF)
+			r = randint(self.bits//2, self.bits)
 			g = keys.get_public_key(r, curve.secp256k1)
 			p.append(str(hex(g.x))[-30:]), n.append(r)
 		return p, n
@@ -71,13 +71,15 @@ class Proc:
 		pubs, no = self.extract()
 		self.public_key = ecdsa.point(self.public)
 		while True:
-			z = randint(1,524287)
+			z = randint(1,self.bits//2)
 			p = ecdsa.add(z, self.public_key)
 			for i in range(1000):
 				if str(hex(ecdsa.add(i, p).x))[-30:] in pubs: self.found(no[pubs.index(str(hex(ecdsa.add(i, p).x))[-30:])] - z - i)
 				if str(hex(ecdsa.ext(i, p).x))[-30:] in pubs: self.found(no[pubs.index(str(hex(ecdsa.ext(i, p).x))[-30:])] - z + i)
 
 if __name__ == "__main__":
+	public = '023ed96b524db5ff4fe007ce730366052b7c511dc566227d929070b9ce917abb43'
+	bits = 22
 	utils = Utils()
 	ecdsa = ECDSA()
-	Proc()
+	Proc(public, bits)
