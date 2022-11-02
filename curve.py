@@ -1,73 +1,63 @@
 # 02/11/2022
 # Created by Sezgin YILDIRIM
 
-from fastecdsa import keys, curve
-from fastecdsa.point import Point
+from multiprocessing import Process
+import secp256k1 as ice
 from random import randint
 import bit
 import sys
 
 class ECDSA:
-	def __init__(self):
-		self.k = int(curve.secp256k1.q) + 1
-
-	def add(self, n, Q):
-		n = keys.get_public_key(n, curve.secp256k1)
-		p = self.k * Q + n
-		return p
-
-	def ext(self, n, Q):
-		n = keys.get_public_key(n, curve.secp256k1)
-		p = self.k * Q - n
-		return p
+	def pub2upub(self, pub_hex):
+		x = int(pub_hex[2:66],16)
+		if len(pub_hex) < 70:
+			y = bit.format.x_to_y(x, int(pub_hex[:2],16)%2)
+		else:
+			y = int(pub_hex[66:],16)
+		return bytes.fromhex('04'+ hex(x)[2:].zfill(64) + hex(y)[2:].zfill(64))
 
 	def compress(self, pub):
-		if pub.y % 2 == 0:
+		pub = hex(int.from_bytes(pub, "big"))[3:]
+		if (int(pub[-1], 16) % 2) == 0:
 			y = '02'
 		else:
 			y = '03'
-		return y + hex(pub.x)[2:].zfill(64)
-
-	def point(self, pub_hex):
-		x = int(pub_hex[2:66], 16)
-		if len(pub_hex) < 70:
-			y = bit.format.x_to_y(x, int(pub_hex[:2], 16) % 2)
-		else:
-			y = int(pub_hex[66:], 16)
-		return Point(x, y, curve=curve.secp256k1)
+		return y + str(pub[:64])
 
 class Proc:
-	def __init__(self, public, bits):
-		self.public, self.bits = public, 2**bits
+	def __init__(self):
+		self.public, self.bits, self.bf = '030d282cf2ff536d2c42f105d0b8588821a915dc3f9a05bd98bb23af67a2e92a5b', 2**30, 2**10
 		self.main()
 
 	def extract(self):
 		p, n = [], []
-		for i in range(1000):
+		for i in range(self.bf):
 			r = randint(self.bits//2, self.bits)
-			g = keys.get_public_key(r, curve.secp256k1)
-			p.append(str(hex(g.x))[-30:]), n.append(r)
+			p.append(ice.scalar_multiplication(r)), n.append(r)
 		return p, n
-			
-	def found(self, priv):
-		fo = keys.get_public_key(priv, curve.secp256k1)
-		if ecdsa.compress(fo) == self.public:
-			print(f'Public Key  : {ecdsa.compress(fo)}')
-			print(f'Private Key : {hex(priv)[2:]}')
-			sys.exit()
 
 	def main(self):
+		self.public_key = ECDSA().pub2upub(self.public)
 		pubs, no = self.extract()
-		self.public_key = ecdsa.point(self.public)
 		while True:
-			z = randint(1,self.bits//2)
-			p = ecdsa.add(z, self.public_key)
-			for i in range(1000):
-				if str(hex(ecdsa.add(i, p).x))[-30:] in pubs: self.found(no[pubs.index(str(hex(ecdsa.add(i, p).x))[-30:])] - z - i)
-				if str(hex(ecdsa.ext(i, p).x))[-30:] in pubs: self.found(no[pubs.index(str(hex(ecdsa.ext(i, p).x))[-30:])] - z + i)
+			z = randint(1,self.bits//4)
+			print(hex(z))
+			r = ice.scalar_multiplication(z)
+			p = ice.point_addition(self.public_key, r)
+			for i in range(1024):
+				p = ice.point_increment(p)
+				if p in pubs:
+					private_key = f'Private Key : {hex(no[pubs.index(p)] - i - z - 1)[2:]}'
+					open('found.txt', 'a').write(str(private_key) + '\n').close()
+					print(private_key)
+					sys.exit()
+
+class M:
+	def multi(self):
+		que = []
+		for session in range(4):
+			que.append(Process(target=Proc, args=( )))
+			que[-1].start()
 
 if __name__ == "__main__":
-	public = '0387dc70db1806cd9a9a76637412ec11dd998be666584849b3185f7f9313c8fd28'
-	bits = 31
-	ecdsa = ECDSA()
-	Proc(public, bits)
+	M().multi()
