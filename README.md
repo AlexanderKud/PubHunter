@@ -1,2 +1,7 @@
 # PubHunter
-Bruteforce to calculate private key over public key.
+
+Under development.
+
+In summary; I am trying to access private key from given public key.
+
+I know what you're thinking, I'm just having fun.
