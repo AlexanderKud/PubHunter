@@ -46,10 +46,11 @@ class Proc:
 			a = ice.point_addition(self.public_key, r)
 			s = a
 			for i in range(1024):
+				a = ice.point_addition(a, self.n)
 				if a in pubs: self.found(no[pubs.index(a)] - i - z - 1)
 				if s in pubs: self.found(no[pubs.index(s)] + i - z + 1)
-				a, s = ice.point_addition(a, self.n), ice.point_subtraction(s, self.n)
-
+				s = ice.point_subtraction(s, self.n)
+				
 if __name__ == "__main__":
 	quit = mp.Event()
 	foundit = mp.Event()
