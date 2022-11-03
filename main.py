@@ -1,20 +1,13 @@
 # 02/11/2022
 # Created by Sezgin YILDIRIM
 
-from multiprocessing import Process
-import secp256k1 as ice
+import multiprocessing as mp
 from random import randint
+import secp256k1 as ice
 import bit
 import sys
 
 class ECDSA:
-	def pub2upub(self, pub_hex):
-		x = int(pub_hex[2:66],16)
-		if len(pub_hex) < 70:
-			y = bit.format.x_to_y(x, int(pub_hex[:2],16)%2)
-		else:
-			y = int(pub_hex[66:],16)
-		return bytes.fromhex('04'+ hex(x)[2:].zfill(64) + hex(y)[2:].zfill(64))
 
 	def compress(self, pub):
 		pub = hex(int.from_bytes(pub, "big"))[3:]
@@ -25,8 +18,10 @@ class ECDSA:
 		return y + str(pub[:64])
 
 class Proc:
-	def __init__(self):
-		self.public, self.bits, self.bf = '030d282cf2ff536d2c42f105d0b8588821a915dc3f9a05bd98bb23af67a2e92a5b', 2**30, 2**10
+	def __init__(self, quit, foundit):
+		self.quit, self.foundit = quit, foundit
+		self.public, self.bits, self.bf = '03a2efa402fd5268400c77c20e574ba86409ededee7c4020e4b9f0edbee53de0d4', 2**40, 2**10
+		self.n = ice.pub2upub('0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798')
 		self.main()
 
 	def extract(self):
@@ -36,28 +31,30 @@ class Proc:
 			p.append(ice.scalar_multiplication(r)), n.append(r)
 		return p, n
 
-	def main(self):
-		self.public_key = ECDSA().pub2upub(self.public)
-		pubs, no = self.extract()
-		while True:
-			z = randint(1,self.bits//4)
-			print(hex(z))
-			r = ice.scalar_multiplication(z)
-			p = ice.point_addition(self.public_key, r)
-			for i in range(1024):
-				p = ice.point_increment(p)
-				if p in pubs:
-					private_key = f'Private Key : {hex(no[pubs.index(p)] - i - z - 1)[2:]}'
-					open('found.txt', 'a').write(str(private_key) + '\n').close()
-					print(private_key)
-					sys.exit()
+	def found(self, priv):
+		private_key = f'Private Key : {hex(priv)[2:]}'
+		open('found.txt', 'a').write(str(private_key) + '\n')
+		print(private_key)
+		self.foundit.set()
 
-class M:
-	def multi(self):
-		que = []
-		for session in range(4):
-			que.append(Process(target=Proc, args=( )))
-			que[-1].start()
+	def main(self):
+		self.public_key = ice.pub2upub(self.public)
+		pubs, no = self.extract()
+		while not self.quit.is_set():
+			z = randint(1,self.bits//4)
+			r = ice.scalar_multiplication(z)
+			a = ice.point_addition(self.public_key, r)
+			s = a
+			for i in range(1024):
+				if a in pubs: self.found(no[pubs.index(a)] - i - z - 1)
+				if s in pubs: self.found(no[pubs.index(s)] + i - z + 1)
+				a, s = ice.point_addition(a, self.n), ice.point_subtraction(s, self.n)
 
 if __name__ == "__main__":
-	M().multi()
+	quit = mp.Event()
+	foundit = mp.Event()
+	for i in range(4):
+		p = mp.Process(target=Proc, args=(quit, foundit))
+		p.start()
+	foundit.wait()
+	quit.set()
