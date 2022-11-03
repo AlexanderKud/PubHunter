@@ -10,7 +10,7 @@ import sys
 class Proc:
 	def __init__(self, quit, foundit):
 		self.quit, self.foundit = quit, foundit
-		self.public, self.bits, self.bf = '02ceb6cbbcdbdf5ef7150682150f4ce2c6f4807b349827dcdbdd1f2efa885a2630', 2**120, 2**21
+		self.public, self.bits, self.bf = '02ceb6cbbcdbdf5ef7150682150f4ce2c6f4807b349827dcdbdd1f2efa885a2630', 2**120, 2**23
 		self.n = ice.pub2upub('0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798')
 		self.main()
 
