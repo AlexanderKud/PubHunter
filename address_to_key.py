@@ -4,9 +4,9 @@ import secp256k1 as ice
 import sys
 
 ##############################################
-address = '1LHtnpd8nU5VHEMkG2TMYYNUjjLc992bps'
+address = '1HsMJxNiV7TLxmoF6uJNkydxPFDog4NQum'
 
-bit = 30 			# Range
+bit = 20 		# Range
 range_smash = 16 	# Split into intervals
 RANGE = 256 		# Stride in every range
 cpu_count = 4 		# CPU COUNT
@@ -41,4 +41,3 @@ if __name__ == '__main__':
 		pc.start()
 	foundit.wait()
 	quit.set()
-	sys.exit()
