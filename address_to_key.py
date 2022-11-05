@@ -1,3 +1,6 @@
+# 02/11/2022
+# Created by Sezgin YILDIRIM
+
 import multiprocessing as mp
 from random import randint
 import secp256k1 as ice
