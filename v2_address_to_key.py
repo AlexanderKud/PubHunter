@@ -3,7 +3,7 @@
 
 import multiprocessing as mp
 from random import randint
-import secp256k1 as ice
+from secp256k1 import b58_decode, privatekey_to_h160, privatekey_loop_h160_sse
 
 ##############################################
 address = '1LHtnpd8nU5VHEMkG2TMYYNUjjLc992bps'
@@ -15,14 +15,14 @@ compressed = True   # 'compressed = True' or 'uncompressed = False'
 ##############################################
 
 _ = 2**(bit-1)
-P = bytes.fromhex(ice.b58_decode(address)[2:-8])
+P = bytes.fromhex(b58_decode(address)[2:-8])
 
 def found(x):
     for i in range(RANGE):
         _p, p_ = x + i, x - i
-        T = ice.privatekey_to_h160(0, compressed, _p) + ice.privatekey_to_h160(0, compressed, p_)
+        T = privatekey_to_h160(0, compressed, _p) + privatekey_to_h160(0, compressed, p_)
         if P in T:
-            V = hex(_p)[2:] if ice.privatekey_to_h160(0, compressed, _p) == P else hex(p_)
+            V = hex(_p)[2:] if privatekey_to_h160(0, compressed, _p) == P else hex(p_)
             print('#'*30 + f'\nPrivate Key : {V}\n' + '#'*30)
             open('found.txt', 'a').write('#'*30 + f'\nPrivate Key : {V}\n' + '#'*30 + '\n')
             foundit.set()
@@ -36,7 +36,7 @@ def RUN():
         R = randint(1, S[1] - S[0])
         for I in range(M):
             K = S[I] + R
-            T = ice.privatekey_loop_h160_sse(RANGE, 0, compressed, K) + ice.privatekey_loop_h160_sse(RANGE, 0, compressed, K - RANGE)
+            T = privatekey_loop_h160_sse(RANGE, 0, compressed, K) + privatekey_loop_h160_sse(RANGE, 0, compressed, K - RANGE)
             if P in T:
                 found(K)
                 break
