@@ -3,26 +3,30 @@
 
 import multiprocessing as mp
 from random import randint
-from secp256k1 import b58_decode, privatekey_to_h160, privatekey_loop_h160_sse
+from secp256k1 import (
+    b58_decode as b58,
+    privatekey_to_h160 as p2h,
+    privatekey_loop_h160_sse as loop
+    )
 
 ##############################################
-address = '1LHtnpd8nU5VHEMkG2TMYYNUjjLc992bps'
+address = '13zb1hQbWVsc2S7ZTZnP2G4undNNpdh5so'
 
-bit = 30            # Range
-RANGE = 1024        # Stride in every range
+bit = 66            # Range
+RANGE = 16384       # Stride in every range
 cpu_count = 4       # CPU COUNT
 compressed = True   # 'compressed = True' or 'uncompressed = False'
 ##############################################
 
 _ = 2**(bit-1)
-P = bytes.fromhex(b58_decode(address)[2:-8])
+P = bytes.fromhex(b58(address)[2:-8])
 
 def found(x):
     for i in range(RANGE):
         _p, p_ = x + i, x - i
-        T = privatekey_to_h160(0, compressed, _p) + privatekey_to_h160(0, compressed, p_)
+        T = p2h(0, compressed, _p) + p2h(0, compressed, p_)
         if P in T:
-            V = hex(_p)[2:] if privatekey_to_h160(0, compressed, _p) == P else hex(p_)
+            V = hex(_p)[2:] if p2h(0, compressed, _p) == P else hex(p_)
             print('#'*30 + f'\nPrivate Key : {V}\n' + '#'*30)
             open('found.txt', 'a').write('#'*30 + f'\nPrivate Key : {V}\n' + '#'*30 + '\n')
             foundit.set()
@@ -36,7 +40,7 @@ def RUN():
         R = randint(1, S[1] - S[0])
         for I in range(M):
             K = S[I] + R
-            T = privatekey_loop_h160_sse(RANGE, 0, compressed, K) + privatekey_loop_h160_sse(RANGE, 0, compressed, K - RANGE)
+            T = loop(RANGE, 0, compressed, K) + loop(RANGE, 0, compressed, K - RANGE)
             if P in T:
                 found(K)
                 break
