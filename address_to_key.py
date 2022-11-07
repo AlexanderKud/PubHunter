@@ -17,7 +17,7 @@ from secp256k1 import (
     privatekey_loop_h160_sse as loop
     )
 
-parser = ArgumentParser(description='I am trying to access private key from given public key.', epilog='https://github.com/geokomplo/')
+parser = ArgumentParser(description='It splits the bit range and assigns a random number in each allocated range, searching backwards and forwards by -r.', epilog='https://github.com/geokomplo/')
 parser.add_argument("-a", "--address", help = "P2PKH Address", required=True)
 parser.add_argument("-b", "--bit", help = "Bit Range (20 - 256)", required=True)
 parser.add_argument("-r", "--range", help = "The number or range of steps to search for in the fragmented bit range. | Default : 16384")
