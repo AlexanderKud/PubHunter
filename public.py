@@ -10,7 +10,6 @@ from ice.secp256k1 import (
 	point_addition as PA,
 	point_subtraction as PS,
 	check_in_bloom as CB)
-import sys
 
 class Proc:
 	def __init__(self, quit, foundit, public_key, bit_range, bloom_range, N_range):
@@ -67,4 +66,3 @@ if __name__ == "__main__":
 		pc.start()
 	foundit.wait()
 	quit.set()
-	sys.exit()
