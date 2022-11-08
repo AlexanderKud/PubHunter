@@ -12,8 +12,6 @@ from ice.secp256k1 import (
 	check_in_bloom as CB)
 import sys
 
-from time import time
-
 class Proc:
 	def __init__(self, quit, foundit, public_key, bit_range, bloom_range, N_range):
 		self.public_key, self.bit_range, self.bloom_range, self.N_range = \
@@ -21,14 +19,12 @@ class Proc:
 		self.main(quit, foundit)
 
 	def bloom(self):
-		print('Creating the bloom filter.')
 		p, self.no = [], []
 		for i in range(self.bloom_range):
 			r = randint(self.bit_range//2, self.bit_range)
 			p.append(SM(r)), self.no.append(r)
 		self._bits, self._hashes, self._bf = bloom(p, 0.000001)
 		del p
-		print('Bloom filter created.')
 
 	def collision(self, priv, foundit):
 		for n in self.no:
@@ -61,7 +57,7 @@ class Proc:
 if __name__ == "__main__":
 	cpu_count = 4
 	bit_range = 2**40
-	bloom_range = 2**24 // cpu_count
+	bloom_range = 2**20 // cpu_count
 	N_range = 2**20
 	public_key = '03a2efa402fd5268400c77c20e574ba86409ededee7c4020e4b9f0edbee53de0d4'
 	quit = mp.Event()
