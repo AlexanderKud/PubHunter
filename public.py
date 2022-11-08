@@ -4,10 +4,15 @@
 import multiprocessing as mp
 from random import randint
 from ice.secp256k1 import (
-    b58_decode as b58,
-    privatekey_to_h160 as p2h,
-    privatekey_loop_h160_sse as loop)
+	scalar_multiplication as SM,
+	Fill_in_bloom as bloom,
+	pub2upub as p2u,
+	point_addition as PA,
+	point_subtraction as PS,
+	check_in_bloom as CB)
 import sys
+
+from time import time
 
 class Proc:
 	def __init__(self, quit, foundit, public_key, bit_range, bloom_range, N_range):
@@ -16,18 +21,20 @@ class Proc:
 		self.main(quit, foundit)
 
 	def bloom(self):
+		print('Creating the bloom filter.')
 		p, self.no = [], []
 		for i in range(self.bloom_range):
 			r = randint(self.bit_range//2, self.bit_range)
-			p.append(ice.scalar_multiplication(r)), self.no.append(r)
-		self._bits, self._hashes, self._bf = ice.Fill_in_bloom(p, 0.000001)
+			p.append(SM(r)), self.no.append(r)
+		self._bits, self._hashes, self._bf = bloom(p, 0.000001)
 		del p
+		print('Bloom filter created.')
 
 	def collision(self, priv, foundit):
 		for n in self.no:
 			private = n + priv
 			for j in range(2):
-				if ice.scalar_multiplication(private) == self.P:
+				if SM(private) == self.P:
 					private_key = f'Private Key : {hex(private)[2:]}'
 					open('found.txt', 'a').write(str(private_key) + '\n')
 					print('-'*40 + f'\nKEY FOUND = {private_key}\n' + '-'*40)
@@ -36,27 +43,27 @@ class Proc:
 				private = n - priv
 
 	def main(self, quit, foundit):
-		self.n = ice.scalar_multiplication(1)
-		self.P = ice.pub2upub(self.public_key)
+		self.n = SM(1)
+		self.P = p2u(self.public_key)
 		self.bloom()
 		while not quit.is_set():
 			rand = randint(1,self.bit_range//4)
 			print(hex(rand))
-			rand_p = ice.scalar_multiplication(rand)
-			add = ice.point_addition(self.P, rand_p)
-			sub = ice.point_subtraction(self.P, rand_p)
+			rand_p = SM(rand)
+			add = PA(self.P, rand_p)
+			sub = PS(self.P, rand_p)
 			for i in range(self.N_range):
-				add, sub = ice.point_addition(add, self.n), ice.point_subtraction(sub, self.n)
-				if ice.check_in_bloom(add, self._bits, self._hashes, self._bf) or ice.check_in_bloom(sub, self._bits, self._hashes, self._bf):
+				add, sub = PA(add, self.n), PS(sub, self.n)
+				if CB(add, self._bits, self._hashes, self._bf) or CB(sub, self._bits, self._hashes, self._bf):
 					if self.collision(rand + i + 1, foundit) == True: break
 
 	
 if __name__ == "__main__":
 	cpu_count = 4
-	bit_range = 2**120
+	bit_range = 2**40
 	bloom_range = 2**24 // cpu_count
 	N_range = 2**20
-	public_key = '02ceb6cbbcdbdf5ef7150682150f4ce2c6f4807b349827dcdbdd1f2efa885a2630'
+	public_key = '03a2efa402fd5268400c77c20e574ba86409ededee7c4020e4b9f0edbee53de0d4'
 	quit = mp.Event()
 	foundit = mp.Event()
 	for i in range(cpu_count):
