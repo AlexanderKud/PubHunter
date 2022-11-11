@@ -47,7 +47,8 @@ def RUN(q, f):
             K = S[I] + R
             T = loop(RANGE, 0, True, K) + loop(RANGE, 0, True, K - RANGE)
             if P in T:
-                found(K), f.set()
+                found(K)
+                f.set()
                 break
 
 if __name__ == '__main__':
