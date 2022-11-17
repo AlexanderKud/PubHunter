@@ -13,39 +13,34 @@ from ice.secp256k1 import (
 	point_to_cpub as p2c)
 import sys
 
-public_key = '03a2efa402fd5268400c77c20e574ba86409ededee7c4020e4b9f0edbee53de0d4'
-
-
-publicKEY = p2u(public_key)
 #public_key = p2c(public_key)
 #print(public_key)
 
-bitRange = 40
-N = 17
+def bloom():
+	p = []
+	for i in range(1, 2**N):
+		p.append(SM(i))
+	_bits, _hashes, _bf = BL(p, 0.000001)
+	return _bits, _hashes, _bf, p
 
-bit = 2**bitRange
+def bList(bit, bitRange):
+	bitList = []
+	for i in range(bitRange-5):
+		bit = bit // 2
+		bitList.append(bit)
+	return bitList
 
-p = []
-for i in range(1, 2**N):
-	p.append(SM(i))
-_bits, _hashes, _bf = BL(p, 0.000001)
-
-bitList = []
-for i in range(bitRange-5):
-	bit = bit // 2
-	bitList.append(bit)
-
-def RUN(q, f):
+def RUN(j,q, f, _bits, _hashes, _bf, p, bitList, N, publicKEY):
+	#print(j)
 	while not q.is_set():
 		pKEY = publicKEY
 		count = []
 		for B in bitList:
-			R = randint(0, 1)
-			if R == 1:
+			if randint(0, 1) == 1:
 				count.append(B)
 				pKEY = PS(pKEY, SM(B))
 				if CB(pKEY, _bits, _hashes, _bf):
-					print('join')
+					print(f'{j} -> join')
 					if pKEY in p:
 						for i in range(1, 2**N):
 							if SM(i) == pKEY:
@@ -56,12 +51,16 @@ def RUN(q, f):
 						f.set()
 
 if __name__ == '__main__':
+	public_key = '03f46f41027bbf44fafd6b059091b900dad41e6845b2241dc3254c7cdd3c5a16c6'
+	publicKEY = p2u(public_key)
+	bitRange = 50
+	N = 22
+	bit = 2**bitRange
+	_bits, _hashes, _bf, p = bloom()
+	bitList = bList(bit, bitRange)
 	q, f = mp.Event(), mp.Event()
 	for j in range(4):
-		PC = mp.Process(target=RUN, args=(q,f))
+		PC = mp.Process(target=RUN, args=(j,q,f,_bits, _hashes, _bf, p, bitList, N, publicKEY))
 		PC.start()
 	f.wait()
 	q.set()
-
-
-
