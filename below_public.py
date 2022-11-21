@@ -26,7 +26,7 @@ def above(bit, bitRange):
 	return ABOVE
 
 def sub(P, bitRange, FIRST):
-	KeysP, KeysI, bit, FIRST, N = [], [], 2**(bitRange-2), SM(FIRST), 2**12
+	KeysP, KeysI, bit, FIRST, N = [], [], 2**(bitRange-2), SM(FIRST), 2**10
 	for I in range(N):
 		R = randint(1, bit)
 		A = SM(R)
@@ -63,8 +63,6 @@ class Multi:
 	def main(self):
 		while not self.Q.is_set():
 			AC = [A for A in self.ABOVE if randint(0, 1) == 1]
-			for i in AC:
-				print(hex(i))
 
 			for RIP in self.KeysP:
 				CC = []
@@ -72,7 +70,6 @@ class Multi:
 					CC.append(C)
 					RIP = PS(RIP, SM(C))
 					if CB(RIP[1:33], self.bits, self.hashes, self.bf):
-						print('JOIN')
 						self.found(RIP[1:33], CC)
 						
 if __name__ == '__main__':
