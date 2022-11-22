@@ -38,7 +38,6 @@ class Multi:
 
 	def found(self, RIP, CC):
 		if RIP in self.BELOW:
-			print('JOINJOINJOIN')
 			self.F.set()
 			for I in range(1, self.N):
 				if SM(I)[1:33] == RIP:
@@ -68,15 +67,12 @@ class Multi:
 	def main(self):
 		while not self.Q.is_set():
 			AC = self.paradigm()
-			for i in AC:
-				print(hex(i))
 			for RIP in self.KeysP:
 				CC = []
 				for C in AC:
 					CC.append(C)
 					RIP = PS(RIP, SM(C))
 					if CB(RIP[1:33], self.bits, self.hashes, self.bf):
-						print('JOIN')
 						self.found(RIP[1:33], CC)
 						
 if __name__ == '__main__':
