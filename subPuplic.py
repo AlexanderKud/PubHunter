@@ -36,53 +36,60 @@ class Multi:
 		Q, F, bits, hashes, bf, BELOW, N, P, KeysP, KeysI, bit
 		self.main()
 
-	def found(self, RIP, CC):
+	def found(self, I):
+		for R in self.KeysI:
+			SUM = sum(CC) + I
+			TETRAGRAMMATON = [abs(SUM + R), abs(SUM - R), abs(SUM + R - I*2), abs(SUM - R - I*2)]
+			for YHVH in TETRAGRAMMATON:
+				if SM(YHVH) == self.P:
+					F = f'\n{"*"*80}\nPrivate KEY : 0x{hex(YHVH)[2:].zfill(64).upper()}\
+						\nPublic KEY  : {p2c(SM(YHVH)).upper()}\n{"*"*80}'
+					print(F), open('found.txt', 'a').write(F)
+					sys.exit()
+
+	def match(self, RIP, CC):
 		if RIP in self.BELOW:
+			print('Match found...')
 			self.F.set()
 			for I in range(1, self.N):
 				if SM(I)[1:33] == RIP:
 					break
-
-			for R in self.KeysI:
-				SUM = sum(CC) + I
-				TETRAGRAMMATON = [abs(SUM + R), abs(SUM - R), abs(SUM + R - I*2), abs(SUM - R - I*2)]
-				for YHVH in TETRAGRAMMATON:
-					if SM(YHVH) == self.P:
-						F = f'\n{"*"*80}\nPrivate KEY : 0x{hex(YHVH)[2:].zfill(64).upper()}\
-							\nPublic KEY  : {p2c(SM(YHVH)).upper()}\n{"*"*80}'
-						print(F), open('found.txt', 'a').write(F)
-						sys.exit()
+			self.found(I)
 
 	def paradigm(self):
-		S, B, P = [], 2**(self.bit), randint(2**(self.bit-1), 2**self.bit)
+		ABOVE, B, S = [], 2**(self.bit), randint(2**(self.bit-1), 2**self.bit)
 		for A in range(self.bit-5):
 			B //= 2
-			P -= B
-			if P <= 0:
-				P += B
+			S -= B
+			if S <= 0:
+				S += B
 			else:
-				S.append(B)
-		return S
+				ABOVE.append(B)
+		return ABOVE
 
 	def main(self):
 		while not self.Q.is_set():
-			AC = self.paradigm()
+			ABOVE = self.paradigm()
 			for RIP in self.KeysP:
-				CC = []
-				for C in AC:
-					CC.append(C)
-					RIP = PS(RIP, SM(C))
+				C = []
+				for A in ABOVE:
+					C.append(A)
+					RIP = PS(RIP, SM(A))
 					if CB(RIP[1:33], self.bits, self.hashes, self.bf):
-						self.found(RIP[1:33], CC)
+						print('JOIN')
+						self.match(RIP[1:33], C)
 						
 if __name__ == '__main__':
-	public_key = '03f46f41027bbf44fafd6b059091b900dad41e6845b2241dc3254c7cdd3c5a16c6'
-	bitRange = 50
-	N = 5000000
+	public_key = '03a2efa402fd5268400c77c20e574ba86409ededee7c4020e4b9f0edbee53de0d4'
+	bitRange = 40
+	N = 1000000
 	P = p2u(public_key)
 	KeysP, KeysI = sub(P, bitRange)
+	print('Filling subregion into memory...', end='')
 	bits, hashes, bf, BELOW = bloom(N)
+	print('Done!')
 	#######################
+	print('Top-down download started!')
 	Q, F = MP.Event(), MP.Event()
 	for j in range(4):
 		PC = MP.Process(target=Multi, args=(Q, F, bits, hashes, bf, BELOW, N, P, KeysP, KeysI, bitRange))
