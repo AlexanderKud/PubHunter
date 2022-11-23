@@ -68,7 +68,6 @@ class Multi:
 
 	def paradigm(self):
 		ABOVE, B, S = [], 2**(self.bit), randint(2**(self.bit-1), 2**self.bit)
-		print(hex(S))
 		for A in range(self.bit-5):
 			B //= 2
 			S -= B
