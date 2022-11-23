@@ -95,9 +95,9 @@ class Multi:
 						
 if __name__ == '__main__':
 	public_key = '03f46f41027bbf44fafd6b059091b900dad41e6845b2241dc3254c7cdd3c5a16c6'	# Public Key
-	BitRANGE = 50   																	                                # Bit Range
-	N = 8000000  	 																                                  	# Load subregion into RAM.
-	CPU_COUNT = 4  	 																                                	# Number of cores
+	BitRANGE = 50   									# Bit Range
+	N = 8000000  	 									# Load subregion into RAM.
+	CPU_COUNT = 4  	 									# Number of cores
 	P = P2U(public_key)
 	print('Filling subregion into memory...')
 	bits, hashes, bf, BELOW = bloom(N)
