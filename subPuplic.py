@@ -36,9 +36,8 @@ class Multi:
 		Q, F, bits, hashes, bf, BELOW, N, P, KeysP, KeysI, bit
 		self.main()
 
-	def found(self, I):
+	def found(self, SUM, I):
 		for R in self.KeysI:
-			SUM = sum(CC) + I
 			TETRAGRAMMATON = [abs(SUM + R), abs(SUM - R), abs(SUM + R - I*2), abs(SUM - R - I*2)]
 			for YHVH in TETRAGRAMMATON:
 				if SM(YHVH) == self.P:
@@ -47,14 +46,14 @@ class Multi:
 					print(F), open('found.txt', 'a').write(F)
 					sys.exit()
 
-	def match(self, RIP, CC):
+	def match(self, RIP, C):
 		if RIP in self.BELOW:
 			print('Match found...')
 			self.F.set()
 			for I in range(1, self.N):
 				if SM(I)[1:33] == RIP:
 					break
-			self.found(I)
+			self.found(sum(C) + I, I)
 
 	def paradigm(self):
 		ABOVE, B, S = [], 2**(self.bit), randint(2**(self.bit-1), 2**self.bit)
@@ -76,7 +75,6 @@ class Multi:
 					C.append(A)
 					RIP = PS(RIP, SM(A))
 					if CB(RIP[1:33], self.bits, self.hashes, self.bf):
-						print('JOIN')
 						self.match(RIP[1:33], C)
 						
 if __name__ == '__main__':
@@ -85,11 +83,10 @@ if __name__ == '__main__':
 	N = 1000000
 	P = p2u(public_key)
 	KeysP, KeysI = sub(P, bitRange)
-	print('Filling subregion into memory...', end='')
+	print('Filling subregion into memory...')
 	bits, hashes, bf, BELOW = bloom(N)
-	print('Done!')
 	#######################
-	print('Top-down download started!')
+	print('Started!')
 	Q, F = MP.Event(), MP.Event()
 	for j in range(4):
 		PC = MP.Process(target=Multi, args=(Q, F, bits, hashes, bf, BELOW, N, P, KeysP, KeysI, bitRange))
